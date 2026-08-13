@@ -1,0 +1,50 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'nav' => [
+        'group' => 'Support',
+        'chat' => 'Live chat',
+    ],
+    'models' => [
+        'conversation' => 'Conversation',
+        'conversations' => 'Conversations',
+    ],
+    'common' => [
+        'id' => 'ID',
+    ],
+    'chat' => [
+        'name' => 'Name',
+        'email' => 'Email',
+        'phone' => 'Phone',
+        'status' => 'Status',
+        'status_open' => 'Open',
+        'status_closed' => 'Closed',
+        'last_message' => 'Last message',
+        'last_message_at' => 'Last activity',
+        'thread' => 'Conversation',
+        'empty_thread' => 'No messages yet.',
+        'reply' => 'Reply',
+        'close' => 'Close chat',
+        'reopen' => 'Reopen',
+        'sender_visitor' => 'Visitor',
+        'sender_agent' => 'Agent',
+        'sender_system' => 'System',
+        'download_attachment' => 'Download',
+        'visitor_typing' => 'Visitor is typing…',
+        'open_conversation' => 'View conversation',
+        'replying_to' => 'Replying to',
+        'reply_cancel' => 'Cancel',
+        'reply_to_message' => 'Reply',
+        'composer_placeholder' => 'Write a reply…',
+        'composer_attach' => 'Attach file',
+        'composer_attach_hint' => 'PDF, Word, or image · max :max MB',
+        'composer_send' => 'Send',
+        'composer_remove_file' => 'Remove',
+        'composer_uploading' => 'Uploading file…',
+        'composer_empty' => 'Write a message or attach a file.',
+        'composer_closed' => 'This chat is closed.',
+        'notification_title' => 'New chat message',
+    ],
+];
