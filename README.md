@@ -1,4 +1,4 @@
-# support-chat
+# mks-support-chat
 
 Filament-backed live support chat for Laravel. Visitors talk through a storefront widget; agents reply in the Filament panel.
 
@@ -13,7 +13,7 @@ This is **not** a generic headless chat SDK. Without Filament nobody can answer.
 ## Install
 
 ```bash
-composer require miran/support-chat
+composer require mks-plugins/mks-support-chat
 php artisan migrate
 ```
 
