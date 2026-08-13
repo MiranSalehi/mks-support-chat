@@ -14,6 +14,7 @@ This is **not** a generic headless chat SDK. Without Filament nobody can answer.
 
 ```bash
 composer require miran/mks-support-chat
+php artisan vendor:publish --tag=support-chat-migrations
 php artisan migrate
 ```
 
@@ -38,6 +39,7 @@ Drop the widget on the public layout:
 Optional publishes:
 
 ```bash
+php artisan vendor:publish --tag=support-chat-migrations
 php artisan vendor:publish --tag=support-chat-config
 php artisan vendor:publish --tag=support-chat-views
 ```

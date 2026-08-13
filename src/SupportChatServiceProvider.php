@@ -27,7 +27,6 @@ class SupportChatServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'support-chat');
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'support-chat');
 
@@ -45,6 +44,10 @@ class SupportChatServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../config/support-chat.php' => config_path('support-chat.php'),
             ], 'support-chat-config');
+
+            $this->publishes([
+                __DIR__.'/../database/migrations/2026_08_13_000001_create_support_chat_tables.php' => database_path('migrations/2026_08_13_000001_create_support_chat_tables.php'),
+            ], 'support-chat-migrations');
 
             $this->publishes([
                 __DIR__.'/../resources/views' => resource_path('views/vendor/support-chat'),
