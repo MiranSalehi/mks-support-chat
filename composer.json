@@ -1,5 +1,5 @@
 {
-    "name": "mks-plugins/mks-support-chat",
+    "name": "miran/mks-support-chat",
     "description": "Filament-backed live support chat for Laravel. Visitor widget plus an admin inbox — no mobile app, no multi-site tabs.",
     "type": "library",
     "license": "MIT",

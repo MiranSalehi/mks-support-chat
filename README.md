@@ -13,7 +13,7 @@ This is **not** a generic headless chat SDK. Without Filament nobody can answer.
 ## Install
 
 ```bash
-composer require mks-plugins/mks-support-chat
+composer require miran/mks-support-chat
 php artisan migrate
 ```
 
