@@ -258,7 +258,9 @@ class Inbox extends Page
                 Action::make('sendTest')
                     ->label(__('support-chat::admin.telegram.test'))
                     ->color('gray')
-                    ->action(fn (): void => $this->sendTelegramTest()),
+                    ->action(function (): void {
+                        $this->sendTelegramTest();
+                    }),
             ]);
     }
 
