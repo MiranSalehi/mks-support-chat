@@ -87,6 +87,44 @@ class Conversation extends Model
         return static::query()->unreadForAgent()->count();
     }
 
+    public function initials(): string
+    {
+        $parts = preg_split('/\s+/u', trim((string) $this->name)) ?: [];
+        $parts = array_values(array_filter($parts));
+
+        if ($parts === []) {
+            return '•';
+        }
+
+        if (count($parts) === 1) {
+            return mb_strtoupper(mb_substr($parts[0], 0, 2));
+        }
+
+        return mb_strtoupper(mb_substr($parts[0], 0, 1).mb_substr($parts[1], 0, 1));
+    }
+
+    public function lastPreview(): string
+    {
+        $message = $this->relationLoaded('latestMessage')
+            ? $this->latestMessage
+            : $this->latestMessage()->first();
+
+        if (! $message) {
+            return '';
+        }
+
+        $body = trim((string) $message->body);
+        if ($body !== '') {
+            return $body;
+        }
+
+        if ($message->hasAttachment()) {
+            return (string) $message->attachment_name;
+        }
+
+        return '';
+    }
+
     public function markReadUpTo(?int $messageId = null): void
     {
         $latest = $messageId ?? $this->messages()->max('id');

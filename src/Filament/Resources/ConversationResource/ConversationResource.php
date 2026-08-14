@@ -10,7 +10,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Miran\SupportChat\Filament\Resources\ConversationResource\Pages\ListConversations;
+use Miran\SupportChat\Filament\Resources\ConversationResource\Pages\Inbox;
 use Miran\SupportChat\Filament\Resources\ConversationResource\Pages\ViewConversation;
 use Miran\SupportChat\Filament\Resources\ConversationResource\Tables\ConversationTable;
 use Miran\SupportChat\Models\Conversation;
@@ -74,7 +74,7 @@ class ConversationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListConversations::route('/'),
+            'index' => Inbox::route('/'),
             'view' => ViewConversation::route('/{record}'),
         ];
     }

@@ -48,7 +48,7 @@ final class NotifyPanelUsers
             : __('support-chat::admin.chat.notification_title');
 
         try {
-            $url = ConversationResource::getUrl('view', ['record' => $conversation->id]);
+            $url = ConversationResource::getUrl('index').'?conversation='.$conversation->id;
         } catch (\Throwable) {
             $url = null;
         }

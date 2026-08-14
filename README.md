@@ -68,6 +68,7 @@ Widget CSS/JS are served from the package (`/support-chat/assets/...`). Publishi
 - Starting a chat with a valid cookie updates **that** conversation. Without a cookie, a new conversation is created — even if the email already exists.
 - Agent replies store `agent_user_id`.
 - The Filament nav badge is unread visitor messages, not “every open chat”.
+- The admin screen is a split inbox (list + thread on one page), not a table that opens a second page.
 
 ## Config
 
