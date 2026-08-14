@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Miran\SupportChat\Events\MessageCreated;
 use Miran\SupportChat\Listeners\NotifyPanelUsers;
+use Miran\SupportChat\Listeners\NotifyTelegram;
 use Miran\SupportChat\Support\ChatService;
 use Miran\SupportChat\View\Components\Widget;
 
@@ -37,6 +38,7 @@ class SupportChatServiceProvider extends ServiceProvider
         Blade::component('support-chat::widget', Widget::class);
 
         Event::listen(MessageCreated::class, NotifyPanelUsers::class);
+        Event::listen(MessageCreated::class, NotifyTelegram::class);
 
         $this->registerRateLimiters();
 
@@ -47,6 +49,7 @@ class SupportChatServiceProvider extends ServiceProvider
 
             $this->publishes([
                 __DIR__.'/../database/migrations/2026_08_13_000001_create_support_chat_tables.php' => database_path('migrations/2026_08_13_000001_create_support_chat_tables.php'),
+                __DIR__.'/../database/migrations/2026_08_14_000002_add_visitor_read_and_settings.php' => database_path('migrations/2026_08_14_000002_add_visitor_read_and_settings.php'),
             ], 'support-chat-migrations');
 
             $this->publishes([

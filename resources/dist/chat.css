@@ -558,6 +558,32 @@ html[dir='rtl'] .sc-chat__panel {
     overflow-wrap: anywhere;
 }
 
+.sc-chat__ticks {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 0.35rem;
+    color: rgb(255 255 255 / 0.55);
+}
+
+.sc-chat__ticks.is-read {
+    color: var(--sc-gold);
+}
+
+.sc-chat__ticks svg {
+    width: 0.95rem;
+    height: 0.7rem;
+}
+
+.sc-chat__ticks-two {
+    margin-inline-start: -0.45rem;
+    display: none;
+}
+
+.sc-chat__ticks.is-read .sc-chat__ticks-two {
+    display: block;
+}
+
 .sc-chat__bubble--typing {
     display: inline-flex;
     align-items: center;

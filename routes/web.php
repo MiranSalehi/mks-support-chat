@@ -36,6 +36,10 @@ Route::prefix($prefix)->group(function (): void {
         ->middleware('throttle:sc-chat-typing')
         ->name('support-chat.typing');
 
+    Route::post('read', [WidgetController::class, 'read'])
+        ->middleware('throttle:sc-chat-read')
+        ->name('support-chat.read');
+
     Route::get('attachments/{message}', [WidgetController::class, 'download'])
         ->middleware('throttle:sc-chat-read')
         ->whereNumber('message')

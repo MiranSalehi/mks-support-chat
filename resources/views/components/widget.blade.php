@@ -29,6 +29,7 @@
         'start' => route('support-chat.start'),
         'messages' => route('support-chat.messages'),
         'typing' => route('support-chat.typing'),
+        'read' => route('support-chat.read'),
     ];
     $avatarMark = (string) config('support-chat.widget.avatar_mark', 'SC');
 @endphp

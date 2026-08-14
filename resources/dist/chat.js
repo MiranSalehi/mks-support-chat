@@ -75,6 +75,8 @@
             let typingRow = null;
             let typingLastSent = 0;
             let typingInFlight = false;
+            let agentReadId = 0;
+            let readLastSent = 0;
             let pollBackoffUntil = 0;
             let unread = 0;
             let audioCtx = null;
@@ -419,6 +421,56 @@
                 row.addEventListener('touchcancel', onEnd);
             };
 
+            const tickSvg = () => {
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('viewBox', '0 0 16 11');
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M1.2 5.8 4.1 9 10.8 1.4');
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke', 'currentColor');
+                path.setAttribute('stroke-width', '1.8');
+                path.setAttribute('stroke-linecap', 'round');
+                path.setAttribute('stroke-linejoin', 'round');
+                svg.append(path);
+                return svg;
+            };
+
+            const buildTicks = (msgId, read) => {
+                const wrap = document.createElement('span');
+                wrap.className = 'sc-chat__ticks' + (read ? ' is-read' : '');
+                wrap.dataset.messageId = String(msgId);
+                wrap.setAttribute('aria-hidden', 'true');
+                const one = tickSvg();
+                one.classList.add('sc-chat__ticks-one');
+                const two = tickSvg();
+                two.classList.add('sc-chat__ticks-two');
+                wrap.append(one, two);
+                return wrap;
+            };
+
+            const applyAgentRead = (id) => {
+                const next = Number(id || 0);
+                if (next > agentReadId) {
+                    agentReadId = next;
+                }
+                thread.querySelectorAll('.sc-chat__ticks').forEach((el) => {
+                    const mid = Number(el.dataset.messageId || 0);
+                    el.classList.toggle('is-read', mid > 0 && agentReadId >= mid);
+                });
+            };
+
+            const pingRead = () => {
+                if (!lead || !open || document.hidden || !endpoints.read) return;
+                if (lastMessageId < 1) return;
+                const now = Date.now();
+                if (now - readLastSent < 2000) return;
+                readLastSent = now;
+                api(endpoints.read, {
+                    method: 'POST',
+                    body: JSON.stringify({ up_to_id: lastMessageId }),
+                }).catch(() => {});
+            };
+
             const appendMessage = (msg) => {
                 const id = Number(msg.id || 0);
                 if (id && seenIds.has(id)) return;
@@ -472,6 +524,10 @@
                 const attachment = msg.attachment;
                 if (attachment?.name) {
                     bubble.append(buildAttachmentCard(attachment));
+                }
+
+                if (role === 'user' && msg.id) {
+                    bubble.append(buildTicks(msg.id, agentReadId >= Number(msg.id)));
                 }
 
                 row.append(bubble);
@@ -536,6 +592,7 @@
                 typingRow = null;
                 seenIds.clear();
                 lastMessageId = 0;
+                agentReadId = 0;
                 (messages || []).forEach((msg) => appendMessage(msg));
                 if (chips) {
             const hasChips = chips.querySelectorAll('[data-sc-chat-chip]').length > 0;
@@ -601,6 +658,8 @@
                         appendMessage(msg);
                     });
                     setAgentTyping(Boolean(payload?.typing?.agent));
+                    applyAgentRead(payload?.agent_read_message_id);
+                    if (open) pingRead();
                     if (incoming > 0) {
                         if (!open) setUnread(unread + incoming);
                         if (!open || document.hidden) playPing();
@@ -627,6 +686,7 @@
                 });
                 setConversationUnlocked(true);
                 renderHistory(conversationPayload.messages || []);
+                applyAgentRead(conversationPayload.agent_read_message_id);
                 setUnread(0);
                 syncSend();
                 // Always poll: fast while the panel is open, slow in the background
@@ -655,6 +715,7 @@
                         scrollThread();
                         startPoll();
                         pollMessages();
+                        pingRead();
                         setUnread(0);
                     } else {
                         setConversationUnlocked(false);

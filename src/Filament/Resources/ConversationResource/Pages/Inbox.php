@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Miran\SupportChat\Filament\Resources\ConversationResource\Pages;
 
 use Carbon\CarbonInterface;
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\Width;
@@ -21,6 +24,8 @@ use Miran\SupportChat\Models\Conversation;
 use Miran\SupportChat\Models\Message;
 use Miran\SupportChat\Support\AttachmentService;
 use Miran\SupportChat\Support\ChatService;
+use Miran\SupportChat\Support\TelegramNotifier;
+use Miran\SupportChat\Support\TelegramSettings;
 use Miran\SupportChat\Support\TypingService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
@@ -190,6 +195,93 @@ class Inbox extends Page
     public function updatedSearch(): void
     {
         unset($this->conversations);
+    }
+
+    public function telegramSettingsAction(): Action
+    {
+        $settings = app(TelegramSettings::class);
+        $locked = $settings->usesEnv();
+
+        return Action::make('telegramSettings')
+            ->label(__('support-chat::admin.telegram.action'))
+            ->modalHeading(__('support-chat::admin.telegram.heading'))
+            ->modalDescription($locked
+                ? __('support-chat::admin.telegram.env_locked')
+                : __('support-chat::admin.telegram.help'))
+            ->schema([
+                Toggle::make('telegram_enabled')
+                    ->label(__('support-chat::admin.telegram.enabled'))
+                    ->disabled($locked),
+                TextInput::make('telegram_bot_token')
+                    ->label(__('support-chat::admin.telegram.bot_token'))
+                    ->password()
+                    ->revealable()
+                    ->disabled($locked)
+                    ->helperText(__('support-chat::admin.telegram.bot_token_help')),
+                TextInput::make('telegram_chat_id')
+                    ->label(__('support-chat::admin.telegram.chat_id'))
+                    ->disabled($locked)
+                    ->helperText(__('support-chat::admin.telegram.chat_id_help')),
+            ])
+            ->fillForm(fn (): array => [
+                'telegram_enabled' => $settings->formEnabled(),
+                'telegram_bot_token' => $settings->maskedToken(),
+                'telegram_chat_id' => $settings->formChatId(),
+            ])
+            ->action(function (array $data) use ($locked): void {
+                if ($locked) {
+                    Notification::make()
+                        ->title(__('support-chat::admin.telegram.env_locked'))
+                        ->warning()
+                        ->send();
+
+                    return;
+                }
+
+                if (! app(TelegramSettings::class)->tableReady()) {
+                    Notification::make()
+                        ->title(__('support-chat::admin.telegram.missing_table'))
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
+
+                app(TelegramSettings::class)->save($data);
+
+                Notification::make()
+                    ->title(__('support-chat::admin.telegram.saved'))
+                    ->success()
+                    ->send();
+            })
+            ->extraModalFooterActions([
+                Action::make('sendTest')
+                    ->label(__('support-chat::admin.telegram.test'))
+                    ->color('gray')
+                    ->action(fn (): void => $this->sendTelegramTest()),
+            ]);
+    }
+
+    public function sendTelegramTest(): void
+    {
+        $ok = app(TelegramNotifier::class)->sendTest();
+
+        Notification::make()
+            ->title($ok
+                ? __('support-chat::admin.telegram.test_sent')
+                : __('support-chat::admin.telegram.test_failed'))
+            ->{$ok ? 'success' : 'warning'}()
+            ->send();
+    }
+
+    public function composerTyping(): void
+    {
+        $conversation = $this->activeConversation;
+        if (! $conversation instanceof Conversation || $conversation->status !== 'open') {
+            return;
+        }
+
+        app(TypingService::class)->markTyping($conversation, TypingService::SIDE_AGENT);
     }
 
     public function poll(): void

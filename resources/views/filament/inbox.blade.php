@@ -26,8 +26,19 @@
     >
         <aside class="sc-rail" aria-label="{{ __('support-chat::admin.models.conversations') }}">
             <div class="sc-rail__head">
-                <p class="sc-rail__kicker">{{ __('support-chat::admin.nav.group') }}</p>
-                <h2 class="sc-rail__title">{{ __('support-chat::admin.nav.chat') }}</h2>
+                <div class="sc-rail__head-copy">
+                    <p class="sc-rail__kicker">{{ __('support-chat::admin.nav.group') }}</p>
+                    <h2 class="sc-rail__title">{{ __('support-chat::admin.nav.chat') }}</h2>
+                </div>
+                <button
+                    type="button"
+                    class="sc-icon-btn sc-rail__settings"
+                    wire:click="mountAction('telegramSettings')"
+                    title="{{ __('support-chat::admin.telegram.action') }}"
+                >
+                    <span class="sr-only">{{ __('support-chat::admin.telegram.action') }}</span>
+                    <x-filament::icon icon="heroicon-o-cog-6-tooth" class="h-4 w-4" />
+                </button>
             </div>
 
             <div class="sc-rail__search">
@@ -79,7 +90,11 @@
                                 <span class="sc-row__time">{{ $this->listTimestamp($conversation->last_message_at) }}</span>
                             </span>
                             <span class="sc-row__bottom">
-                                <span class="sc-row__preview">{{ $preview !== '' ? $preview : '—' }}</span>
+                                @if ($visitorTyping && $isActive)
+                                    <span class="sc-row__preview is-typing">{{ __('support-chat::admin.chat.visitor_typing_preview') }}</span>
+                                @else
+                                    <span class="sc-row__preview">{{ $preview !== '' ? $preview : '—' }}</span>
+                                @endif
                                 @if ($unread > 0)
                                     <span class="sc-row__badge">{{ $unread > 9 ? '9+' : $unread }}</span>
                                 @endif
@@ -231,9 +246,17 @@
                                     </div>
                                 @endif
 
-                                <time datetime="{{ $message->created_at?->toIso8601String() }}">
-                                    {{ $message->created_at?->format('H:i') }}
-                                </time>
+                                <div class="sc-bubble__foot">
+                                    <time datetime="{{ $message->created_at?->toIso8601String() }}">
+                                        {{ $message->created_at?->format('H:i') }}
+                                    </time>
+                                    @if ($isAgent)
+                                        <span class="sc-ticks{{ $record->hasVisitorRead((int) $message->id) ? ' is-read' : '' }}" aria-hidden="true">
+                                            <svg viewBox="0 0 16 11" class="sc-ticks__one"><path d="M1.2 5.8 4.1 9 10.8 1.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            <svg viewBox="0 0 16 11" class="sc-ticks__two"><path d="M1.2 5.8 4.1 9 10.8 1.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     @empty
@@ -293,6 +316,7 @@
                                     placeholder="{{ __('support-chat::admin.chat.composer_placeholder') }}"
                                     x-data
                                     x-on:keydown.enter="if (!$event.shiftKey) { $event.preventDefault(); $wire.sendComposer() }"
+                                    x-on:input.throttle.1500ms="$wire.composerTyping()"
                                 ></textarea>
                                 <div class="sc-composer__bar">
                                     <label class="sc-composer__attach" title="{{ __('support-chat::admin.chat.composer_attach') }}">
@@ -388,7 +412,17 @@
             border-inline-end: 1px solid var(--sc-line);
         }
         .sc-rail__head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
             padding: 1rem 1.1rem 0.35rem;
+        }
+        .sc-rail__head-copy {
+            min-width: 0;
+        }
+        .sc-rail__settings {
+            margin-top: 0.15rem;
         }
         .sc-rail__kicker {
             margin: 0;
@@ -551,6 +585,10 @@
             color: var(--sc-ink-soft);
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+        .sc-row__preview.is-typing {
+            color: var(--sc-coral);
+            font-weight: 650;
         }
         .sc-row__badge {
             display: inline-flex;
@@ -772,9 +810,34 @@
         }
         .sc-bubble time {
             display: block;
-            margin-top: 0.25rem;
             font-size: 0.62rem;
             opacity: 0.6;
+        }
+        .sc-bubble__foot {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.3rem;
+            margin-top: 0.25rem;
+        }
+        .sc-ticks {
+            display: inline-flex;
+            align-items: center;
+            color: rgb(255 255 255 / 0.55);
+        }
+        .sc-ticks.is-read {
+            color: var(--sc-coral);
+        }
+        .sc-ticks svg {
+            width: 0.95rem;
+            height: 0.7rem;
+        }
+        .sc-ticks__two {
+            margin-inline-start: -0.45rem;
+            display: none;
+        }
+        .sc-ticks.is-read .sc-ticks__two {
+            display: block;
         }
         .sc-quote {
             margin: 0 0 0.4rem;

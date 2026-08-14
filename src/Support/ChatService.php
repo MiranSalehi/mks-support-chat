@@ -274,6 +274,7 @@ final class ChatService
             'phone' => $conversation->phone_display,
             'status' => $conversation->status,
             'last_message_at' => optional($conversation->last_message_at)?->toIso8601String(),
+            'agent_read_message_id' => (int) ($conversation->agent_read_message_id ?? 0),
         ];
 
         if ($withMessages) {

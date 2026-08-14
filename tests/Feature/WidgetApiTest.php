@@ -82,4 +82,39 @@ final class WidgetApiTest extends TestCase
             'body' => 'hello',
         ])->assertStatus(401);
     }
+
+    public function test_read_without_cookie_is_unauthorized(): void
+    {
+        $this->postJson(route('support-chat.read'))->assertStatus(401);
+    }
+
+    public function test_read_advances_visitor_read_cursor(): void
+    {
+        $chat = app(ChatService::class);
+        [$conversation, $raw] = $chat->start('Ada', 'ada@example.com', '+15551234567');
+        $message = $chat->addMessage($conversation, \Miran\SupportChat\Models\Message::SENDER_AGENT, 'Hi Ada');
+
+        $this->withCredentials()
+            ->withCookie($chat->cookieName(), $raw)
+            ->postJson(route('support-chat.read'), ['up_to_id' => $message->id])
+            ->assertOk()
+            ->assertJsonPath('ok', true);
+
+        $this->assertSame((int) $message->id, (int) $conversation->fresh()->visitor_read_message_id);
+        $this->assertTrue($conversation->fresh()->hasVisitorRead((int) $message->id));
+    }
+
+    public function test_messages_payload_includes_agent_read_cursor(): void
+    {
+        $chat = app(ChatService::class);
+        [$conversation, $raw] = $chat->start('Ada', 'ada@example.com', '+15551234567');
+        $visitor = $chat->addMessage($conversation, \Miran\SupportChat\Models\Message::SENDER_VISITOR, 'Hello');
+        $conversation->markReadUpTo((int) $visitor->id);
+
+        $this->withCredentials()
+            ->withCookie($chat->cookieName(), $raw)
+            ->getJson(route('support-chat.messages'))
+            ->assertOk()
+            ->assertJsonPath('agent_read_message_id', (int) $visitor->id);
+    }
 }

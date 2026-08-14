@@ -29,4 +29,14 @@ return [
         'avatar_mark' => env('SUPPORT_CHAT_AVATAR_MARK', 'SC'),
         'quick_replies' => [],
     ],
+
+    /*
+    | Optional env override for Telegram. When bot_token is set here it wins
+    | over the inbox settings form. Leave empty to configure from the panel.
+    */
+    'telegram' => [
+        'enabled' => env('SUPPORT_CHAT_TELEGRAM_ENABLED'),
+        'bot_token' => env('SUPPORT_CHAT_TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('SUPPORT_CHAT_TELEGRAM_CHAT_ID'),
+    ],
 ];

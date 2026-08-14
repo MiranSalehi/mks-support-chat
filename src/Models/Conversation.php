@@ -24,6 +24,7 @@ class Conversation extends Model
         'entry_page_path',
         'last_message_at',
         'agent_read_message_id',
+        'visitor_read_message_id',
     ];
 
     protected function casts(): array
@@ -127,11 +128,36 @@ class Conversation extends Model
 
     public function markReadUpTo(?int $messageId = null): void
     {
+        $this->advanceReadCursor('agent_read_message_id', $messageId);
+    }
+
+    public function markVisitorReadUpTo(?int $messageId = null): void
+    {
+        $this->advanceReadCursor('visitor_read_message_id', $messageId);
+    }
+
+    public function hasAgentRead(int $messageId): bool
+    {
+        return (int) ($this->agent_read_message_id ?? 0) >= $messageId;
+    }
+
+    public function hasVisitorRead(int $messageId): bool
+    {
+        return (int) ($this->visitor_read_message_id ?? 0) >= $messageId;
+    }
+
+    private function advanceReadCursor(string $column, ?int $messageId): void
+    {
         $latest = $messageId ?? $this->messages()->max('id');
         if ($latest === null) {
             return;
         }
 
-        $this->forceFill(['agent_read_message_id' => (int) $latest])->save();
+        $latest = (int) $latest;
+        if ($latest <= (int) ($this->{$column} ?? 0)) {
+            return;
+        }
+
+        $this->forceFill([$column => $latest])->save();
     }
 }

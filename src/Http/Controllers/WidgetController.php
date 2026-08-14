@@ -82,6 +82,7 @@ final class WidgetController extends Controller
             'typing' => [
                 'agent' => $this->typing->isTyping($conversation, TypingService::SIDE_AGENT),
             ],
+            'agent_read_message_id' => (int) ($conversation->fresh()?->agent_read_message_id ?? 0),
         ]);
     }
 
@@ -99,6 +100,27 @@ final class WidgetController extends Controller
         $this->typing->markTyping($conversation, TypingService::SIDE_VISITOR);
 
         return response()->json(['ok' => true]);
+    }
+
+    public function read(Request $request): JsonResponse
+    {
+        $conversation = $this->chat->findByRawToken($this->rawToken($request));
+        if (! $conversation) {
+            return response()->json(['message' => 'Chat session not found.'], 401);
+        }
+
+        $max = (int) ($conversation->messages()->max('id') ?? 0);
+        $requested = $request->integer('up_to_id', 0);
+        $target = $requested > 0 ? min($requested, $max) : $max;
+
+        if ($target > 0) {
+            $conversation->markVisitorReadUpTo($target);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'visitor_read_message_id' => (int) ($conversation->visitor_read_message_id ?? 0),
+        ]);
     }
 
     public function send(SendChatMessageRequest $request): JsonResponse

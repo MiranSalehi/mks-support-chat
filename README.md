@@ -69,7 +69,18 @@ Widget CSS/JS are served from the package (`/support-chat/assets/...`). Publishi
 - Agent replies store `agent_user_id`.
 - The Filament nav badge is unread visitor messages, not “every open chat”.
 - The admin screen is a split inbox (list + thread on one page), not a table that opens a second page.
+- Visitor messages can ping a Telegram bot. Configure it from the inbox gear, or with `SUPPORT_CHAT_TELEGRAM_*` env vars (env wins).
+- One tick = stored. Two ticks = the other party has read. There is no separate “delivered” state; this package polls.
 
 ## Config
 
 See `config/support-chat.php` after publishing. `widget.quick_replies` is an empty list by default.
+
+After upgrading, publish **new** migrations again and migrate:
+
+```bash
+php artisan vendor:publish --tag=support-chat-migrations
+php artisan migrate
+```
+
+Telegram alerts run on the `MessageCreated` event. With `QUEUE_CONNECTION=sync` they send in the same request. Use a real queue in production so a slow Telegram API cannot stall the visitor send.
