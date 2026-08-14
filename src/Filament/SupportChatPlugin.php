@@ -22,12 +22,9 @@ final class SupportChatPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel
-            ->resources([
-                ConversationResource::class,
-            ])
-            ->databaseNotifications()
-            ->databaseNotificationsPolling('15s');
+        $panel->resources([
+            ConversationResource::class,
+        ]);
     }
 
     public function boot(Panel $panel): void

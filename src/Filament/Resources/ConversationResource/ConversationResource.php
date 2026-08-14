@@ -47,7 +47,11 @@ class ConversationResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = Conversation::unreadForAgentCount();
+        try {
+            $count = Conversation::unreadForAgentCount();
+        } catch (\Throwable) {
+            return null;
+        }
 
         return $count > 0 ? (string) $count : null;
     }

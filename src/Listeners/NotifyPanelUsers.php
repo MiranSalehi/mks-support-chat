@@ -7,6 +7,7 @@ namespace Miran\SupportChat\Listeners;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Schema;
 use Miran\SupportChat\Events\MessageCreated;
 use Miran\SupportChat\Filament\Resources\ConversationResource\ConversationResource;
 use Miran\SupportChat\Models\Conversation;
@@ -29,6 +30,10 @@ final class NotifyPanelUsers
 
         $users = $this->notifiableUsers();
         if ($users === []) {
+            return;
+        }
+
+        if (! Schema::hasTable('notifications')) {
             return;
         }
 

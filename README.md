@@ -30,6 +30,22 @@ public function panel(Panel $panel): Panel
 }
 ```
 
+Do **not** enable Filament `databaseNotifications()` unless Laravel's `notifications` table exists. If you want the panel bell for new visitor messages:
+
+```bash
+php artisan notifications:table
+php artisan migrate
+```
+
+Then on the panel:
+
+```php
+$panel
+    ->plugin(SupportChatPlugin::make())
+    ->databaseNotifications()
+    ->databaseNotificationsPolling('15s');
+```
+
 Drop the widget on the public layout:
 
 ```blade
